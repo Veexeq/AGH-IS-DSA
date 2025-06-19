@@ -19,6 +19,23 @@
 # 4. (Opcjonalnie) Zmodyfikuj algorytm tak, by dało się skonstruować optymalne rozwiązanie
 # (np. zapisz w których miejscach podzieliliśmy tablicę)
 #
+# Kilka zdań podsumowania z wykładu:
+# Problem posiada optymalną podstrukturę, jeśli jego rozwiązanie jest funkcją optymalnie
+# rozwiązanych podproblemów. Jeśli mamy optymalną podstrukturę, to czasem problem można również
+# rozwiązać strategią zachłanną (greedy).
+# Aby znaleźć optymalną podstrukturę należy wpierw pokazać, że problem polega na dokonaniu pewnego
+# wyboru, który zostawia nas z jednym, bądź więcej podproblemami do rozwiązania. Nie musimy znać tego
+# wyboru od razu, ale musimy być pewni, że jest wśród rozważanych.
+# Optymalne podstruktury zależą od liczby podproblemów, które pozostawia wybór, a także liczbą podproblemów
+# które należy rozważyć, by wybrać dobrą opcję.
+#
+# Memoization vs bottom-up:
+# Jeśli problem ma intuicyjną strukturę i podproblemy da się rozwiązać w naturalnej kolejności, to łatwiej jest
+# użyć konstrukcji rozwiązania wstępującego. Jeśli natomiast mamy z tym trudności, bądź wiemy, że nie potrzeba
+# nam rozwiązywać wszystkich podproblemów (tak robi bottom-up), to możemy skonstruować rozwiązanie używającego
+# spamiętywania. Będzie to ciut wolniejsze ze względu na rekurencję, ale ostatecznie może wyjść nam na lepsze,
+# jeśli trafimy na scenariusze opisane powyżej.
+#
 # Problemy rozwiązywane na wykładzie i laboratoriach:
 # 1. Matrix Chain Multiplication (MCM) - problem polegający na tym, aby znaleźć
 # optymalne nawiasowanie ciągu macierzy, czyli zminimalizować liczbę operacji
@@ -106,7 +123,8 @@ print() # Wyłącznie dla testowania w konsoli
 
 # Złożoność obliczeniowa:
 # Bez DP sprawdzamy każdą możliwość, więc dla ciągu n macierzy jest to n-1 liczba Catalana, więc
-# P(n) = O(4^n) to sensowne ograniczenie od góry
+# P(n) = O(4^n) to sensowne ograniczenie od góry. Na wykładzie był natomiast dowód, że rekurencyjny algorytm bez 
+# spamiętywania jest ograniczony od doły Omega(2^n).
 # Z DP sprowadzamy ten algorytm do:
 #   a) Time Complexity: Theta(n^3) - uwaga, na wykładzie było Omega(n^3), nie wiem dlaczego
 #   b) Space Complexity: Theta(n^2)
@@ -150,7 +168,7 @@ v = [0, 12, 10, 20, 15]
 w = [0, 2, 1, 3, 2]
 
 def discrete_knapsack(W, N, v, w):
-    # Inicjalizujemy pustą tablicę dp[0...N,0...W] i drugą, na rekonstrukcję rozwiązania
+    # Inicjalizujemy pustą tablicę dp[0...N,0...W]
     dp = [[0 for _ in range(0, W+1)] for _ in range(0, N+1)]
 
     for i in range(1, N+1):
@@ -213,3 +231,8 @@ coin_change(N, L, K)
 # Złożoność obliczeniowa:
 #   a) Time Complexity: Theta(K*L)
 #   b) Space Complexity: Theta(K*L)
+
+# Inne typowe problemy używające DP:
+# 1. Floyd-Warshall - najkrótsze ścieżki między wszystkimi parami wierzchołków grafu ważonego
+# 2. Problem komiwojażera - znajdowanie cykli Hamiltona w grafach
+# 3. Bellman-Ford - najkrótsze ścieżki od źródła do wszystkich innych wierzchołków w grafie 
