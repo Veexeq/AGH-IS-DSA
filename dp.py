@@ -236,3 +236,4 @@ coin_change(N, L, K)
 # 1. Floyd-Warshall - najkrótsze ścieżki między wszystkimi parami wierzchołków grafu ważonego
 # 2. Problem komiwojażera - znajdowanie cykli Hamiltona w grafach
 # 3. Bellman-Ford - najkrótsze ścieżki od źródła do wszystkich innych wierzchołków w grafie 
+# =================================================================================================
