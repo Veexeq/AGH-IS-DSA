@@ -201,6 +201,69 @@ def DFS_VISIT(node):
 # Przechodzimy do klasyfikacji krawędzi. Wyobraźmy sobie, że przeprowadzamy zwykły DFS. Jeśli napotykamy biały wierzchołek, to 
 # jest to "krawędź drzewowa", najczęstsza, tworząca drzewo DFS. Jeśli napotkamy na szary wierzchołek, to jest to krawędź powrotna,
 # czyli taka, że znów trafilibyśmy na tę samą ścieżkę. Jeśli trafimy na czarny kolor, to powstają dwa scenariusze:
-# - jeśli u.visit_time < v.visit_time, to wpierw odwiedziliśmy wierzchołek 'u' i zakończyliśmy już przetwarzanie 'v'.
-# Krawędź (u,v) nazywamy "krawędzią w przód".
-# - jeśli u.visit_time > v.visit_time
+# - jeśli u.visit_time < v.visit_time, to najpierw odwiedziliśmy wierzchołek 'u', z jego poziomu zakończyliśmy przetwarzanie 'v',
+# a teraz ponownie odwiedzamy 'v', bezpośrednio z 'u'. Krawędź (u,v) nazywamy "krawędzią w przód".
+# - jeśli u.visit_time > v.visit_time, to znaczy, że jest też prawdziwe u.finish_time > v.visit_time. Wniosek jest taki, że
+# przetworzyliśmy już węzeł v, a więc także cały podgraf z nim związany. Oznacza to, że w drzewie DFS ten wierzchołek znajduje się w 
+# innym poddrzewie, więc krawędź (u,v) nazywamy "krawędzią poprzeczną".
+# Najłatwiej jest to zobaczyć patrząc na drzewo DFS, tam jasno widać, która krawędź byłaby "w przód", która "powrotna",
+# a krawędzie "poprzeczne" to krawędzie (u,v) w sytuacji, gdy 'v' nie jest potomkiem 'u' - należy do innego poddrzewa.
+# 
+# Ostatnią rzeczą na temat krawędzi jest twierdzenie dotyczące sytuacji, gdy mamy do czynienia z grarfem nieskierowanym:
+# Wykonując DFS na grafie nieskierowanym, każda krawędź będzie albo drzewowa, albo powrotna.
+# =================================================================================================
+
+# =================================================================================================
+# 2. Sortowanie topologiczne:
+# Sortowanie topologiczne dotyczy grafów skierowanych acyklicznych. Polega to na tym, że sprowadzamy wszystkie krawędzie
+# tego grafu do jednej linii prostej. Jeśli w grafie występuje krawędź (u,v), to wierzchołek 'u' musi być na liście 
+# wynikowej sortowania topologicznego ustawiony przed wierzchołkeim 'v'. Przykładem zastosowania grafów skierowanych
+# acyklicznych jest określanie kolejności wykonywania czynności (zrób A przed B, C przed A, D wymaga zrobienia wcześniej 
+# A i C itd...), więc sortowanie topologiczne będzie tu bardzo przydatne - określi co należy wykonać przed każdą jedną czynnością.
+#
+# Algorytm sortowania topologicznego jest wbrew pozorom niezwykle prosty, gdyż skorzystamy ze zdefiniowanych uprzednio
+# czasów przetworzenia danych wierzchołków. Jeśli bowiem wierzchołek kolorujemy na czarno, czyli jest on przetworzony, to nie 
+# ma z jego poziomu żadnych krawędzi do innych wierzchołków, które mogłyby od niego "zależeć", jeśli kontynuujemy motyw ustawiania 
+# czynności w odpowiedniej kolejności. Cały algorytm polega na tym, aby wykonać DFS na grafie, a gdy przetworzymy już jakiś wierzchołek,
+# to dodajemy go na początek listy. Tak więc pierwszzy przetworzony wierzchołek (od którego nic dalej nie zależy) wyląduje na
+# samym końcu, a źródło grafu (jeśli oczywiście będzie spójny) będzie na samym początku, gdyż wszystko od niego zależy.
+#
+
+time = 0
+
+def topological_sort(G):
+    # Tutaj wszystko tak, jak w DFS
+    for node in G.V:
+        node.colour = 'WHITE'
+        node.parent = 'NIL'
+
+    # Lista wierzchołków, wynik sortowania
+    res = []
+
+    for node in G.V:
+        if node.colour == 'WHITE':
+            DFS_TOPO_VISIT(node, res)
+
+    return res
+
+def DFS_TOPO_VISIT(node, res):
+    node.colour = 'GRAY'
+    time += 1
+    node.visit_time = time
+    
+    # Bazujemy na liście sąsiedztwa
+    for neighbor in node.neighbors:
+        if neighbor.colour == 'WHITE':
+            neighbor.parent = node
+            DFS_TOPO_VISIT(neighbor, res)
+    
+    node.colour = 'BLACK'
+    time += 1
+    node.finish_time = time
+
+    # Różnica względem normalnego DFS_VISIT, dodajemy na początek listy
+    res.insert(0, node)
+
+#
+# Złożoność obliczeniowa tego algorytmu jest taka sama jak w przypadku DFS, czyli Theta(V+E). Złożoność
+# pamięciowa to długość nowo utworzonej listy, więc Theta(V).
