@@ -1,5 +1,6 @@
 # =================================================================================================
 # Wstęp / podsumowanie:
+# 
 # Omawialiśmy kilka podstawowych abstrakcyjnych struktur danych, były to:
 # 1. Min/Max Heap (kopiec typu min/max) oparty na tablicy
 # 2. Priority Queue (kolejka priorytetowa, najczęściej typu min, czyli pierwsze do wyjścia 
@@ -8,9 +9,11 @@
 # 4. Hash table (tablice z hashowaniem)
 # 5. BST (drzewa poszukiwań binarnych)
 # 6. Red-Black Trees (drzewa czerwono-czarne)
+# 
 # Pozostawione bez głębszego omówienia:
 # 7. Stack (stos, kolejka LIFO)
 # 8. Queue (zwykła kolejka FIFO)
+#
 # Osobno były omawiane grafy, gdyż tam niewiele jest do powiedzenia na temat ich reprezentacji jako
 # abstrakcyjnej struktury danych. Implementowaliśmy je za pomocą macierzy sąsiedztwa, bądź też listy
 # sąsiedztwa, w zależności od relacji między licznością wierzchołków a licznością krawędzi.
