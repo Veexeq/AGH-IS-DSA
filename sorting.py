@@ -19,6 +19,7 @@
 # 3. Sortowanie przez scalanie (merge sort)
 # 4. Sortowanie przez kopcowanie (heap sort)
 # 5. Sortownie szybkie (quick sort)
+# 6. Sortowania niewykorzystujące porówań (counting sort, radix sort)
 # =================================================================================================
 
 # =================================================================================================
@@ -307,4 +308,232 @@ def build_max_heap(arr):
         heapify(arr, i)
 
 #
+# Złożoność obliczeniowa: procedura heapify jest ograniczona przez wysokość drzewa i wynosi O(h). h natomiast jest ograniczone
+# przez ilość węzłów 'n' i wynosi h = (lgn). W efekcie asymptotyczna złożoność heapify wynosi O(lgn). Build_max_heap natomiast
+# przeczy intuicji i wcale nie ma czasu O(n*lgn), tylko O(n). Dowód:
+# na wysokości h drzewa znajduje się ceil[n/[2^(h+1)]] węzłów. Maksymalna wysokość to floor(lg(n))
+# w najgorszym przypadku każde z tych węzłów przejdzie na sam dół w czasie heapify, czyli O(h).
+#
+#       T(n) = SUM[h=0, floor(lg(n))] {n/[2^(h+1)] * O(h)} = O(n*SUM[h=0, floor(lg(n))] {h/2^(h+1)})
+#               Z teorii szeregów można sprawdzić, że szereg sum częściowych h/2^h = 1, więc:
+#                                           T(n) = O(n*1) = O(n)
+#
+# Wszystko to jest w miejscu, czyli złożoność pamięciowa to O(1).
 # 
+
+def heapsort(arr):
+    build_max_heap(arr)
+    # Usuwamy z kopca już posortowane elementy
+    for i in range(arr.length, 2, -1):
+        arr.swap(1, i)
+        # Zmniejszając rozmiar kopca zostawimy już posortowane elementy "w spokoju"
+        arr.heapsize -= 1
+        heapify(arr, 1)
+
+#
+# Złożoność obliczeniowa: pętla wywołuje się Theta(n) razy, każde wywołanie heapify ma złożoność O(lgn), więc złożoność
+# heapsort wynosi O(n*lgn). 
+# Złożoność pamięciowa to O(1), czyli sortowanie następuje w miejscu.
+#
+# Ze względu na operacje swap, sortowanie to nie jest stabilne.
+# =================================================================================================
+
+# =================================================================================================
+# 5. Sortowanie szybkie:
+# Quick sort to jeden z najpopularniejszych algorytmów do sortowania. Choć ma taką samą złożoność obliczeniową w przeciętnym
+# przypadku co merge sort oraz heap sort, a pesymistyczną złożoność nawet O(n^2), to ze względu na stałe czynniki jest on i tak
+# w praktyce najszybszy z nich. Sortowanie szybkie działa w ten sposób, że dzieli tablicę arr[i...j] na dwie podtablice
+# arr[i...q-1] oraz arr[q+1...j] tak, że wszystko w pierwszej z nich jest mniejsze niż arr[q], a wszystko w drugiej z nich jest
+# większe niż arr[q]. Ze względu na to, że przestawia on elementy na bierządzo w trakcie wykonywania tej partycji, to nie jest
+# konieczne by te dwie podtablice łączyć, gdyż są one już posortowane. Partycjonowanie można zrobić na wiele sposobów, dwa z 
+# najpopularniejszych to partycja Lomuto oraz Hoare. Hoare był pierwszy ze swoim pomysłem, jego procedura jest szybsza od Lomuto, 
+# lecz nieco trudniejsza w zaimplementowaniu. Wpierw zajmiemy się procedurą dzielącą Lomuto. 
+#
+# Załóżmy, że mamy partycjonowania podtablicę arr, niech będzie arr[p,r]. Partition Lomuto działa ona na tej 
+# zasadzie, że trzyma dwa indeksy, 'i' oraz 'j', które dzielą tablicę na trzy części:
+# - arr[p...i]: elementy mniejsze niż pivot
+# - arr[i+1...j-1]: elementy większe niż pivot
+# Gdzie pivot jest tym elementem rozgraniczającym, który może zostać losowo wybrany. Na ten moment niech to będzie ostatni element
+# tablicy arr[p...r], więc arr[r]. Jest to w zasadzie niezmiennik pętli, ale do tego dojdziemy za jakiś czas. 
+# Zaczynamy partycjonowanie od ustawienia 'i' przed pierwszym elementem, oraz 'j' na pierwszym elemencie. Idziemy z indeksem j
+# w pętli aż dojdziemy do przedostatniego elementu, gdyż pivota nie będziemy porównywać. W trakcie przejścia po naszej pętli będziemy
+# dokonywać wyboru:
+# - arr[j] <= pivot: aktualnie sprawdzany element jest mniejszy od pivota, w takim wypadku należy przesunąć indeks i o kolejne miejsce,
+# tym samym zaznaczając większy obszar w tablicy, a następnie zamienić arr[i] z arr[j]. Dlaczego następuje zamiana? Rozważmy
+# dwa scenariusze:
+#   a) arr[i...j] pusta, jeszcze nie znaleźliśmy elementów większych od pivota, zamiana nic nie robi, bo i=j
+#   b) arr[i+1...j] ma k elementów, które są większe od pivota. Po zwiększeniu indeksu 'i', będzie on wskazywał na pierwszy element z
+# tej podtablicy, więc robiąc zamianę wstawiamy arr[j] (które jest mniejsze od pivota) w do tablicy arr[p...i], a ten pierwszy
+# większy element idzie do sekcji, która ma już przetworzone elementy większe od pivota.
+# - arr[j] > pivot: wtedy nie robimy nic, po prostu powiększa się podtablica arr[i+1...r].
+#
+
+def partition_lomuto(arr, p, r):
+    # Tablica jednoelementowa jest już posortowana
+    pivot = arr[r]
+    i = p-1
+    # Idziemy z j aż do r-1
+    for j in range(p, r):
+        if arr[j] <= pivot:
+            i += 1
+            arr.swap(i,j)
+    arr.swap(i+1, r)
+    # Na zakończeniu mamy tablicę arr[p...i] <= pivot, arr[i+1] to pivot,
+    # a arr[i+2...r] >= pivot. Zwracamy pivot.
+    return i+1
+
+def quick_sort(arr, p, r):
+    # Tablica jednoelementowa jest już posortowana 
+    if p < r:
+        # Podział tablicy na arr[p...q-1] i arr[q+1...r]
+        q = partition_lomuto(arr, p, r)
+        quick_sort(arr, p, q-1)
+        quick_sort(arr, q+1, r)
+
+#
+# Złożoność obliczeniowa: procedura dzieląca Lomuto ma złożoność liniową, gdyż posiada jedną pętle wykonującą się Theta(n) razy,
+# a w tej pętli działania zajmują O(1) czasu. Działa ona w miejscu. Quick sort ma złożoność obliczeniową różną w zależności od przypadku:
+#
+# - Jeśli dostaniemy podziały, które są względnie równomierne, my założymy optymistyczny scenariusz, to wtedy nasz algorytm opisuje
+# relacja rekurencyjna T(n) = 2*T(n/2) + Theta(n) = Theta(n*lgn). 
+#
+# - W pesymistycznym przypadku jest jednak inaczej, gdyż mamy równanie rekurencyjne 
+#               T(n) = T(n-1) + O(1) + Theta(n) = T(n-1) + Theta(n) 
+# Nietrudno to rozwiązać, choćby metodą podstawiania, albo za pomocą indukcji. Asymptotyczne ograniczenie tej relacji to Theta(n^2). 
+# 
+# Warto jednak nadmienić, że dla każdego skończonego stosunku podziału na te dwie podtablice, otrzymamy równanie typu 
+#                   T(n) = T(k*n) + T((1-k)*n) + Theta(n), gdzie k należy do (0,1) 
+# które asymptotycznie rozwiązuje się T(n) = O(n*lgn). Dla przeciętnego przypadku występuje raz pesymistyczny podział, raz 
+# optymistyczny, ale w efekcie się to równoważy i otrzymujemy T(n) = O(n*lgn). Przykładem danych wejściowych zwracających pesymistyczny 
+# przypadek jest posortowana tablica.
+#
+# Dowód poprawności procedury dzielącej Lomuto poprzez niezmiennik pętli:
+# Na początku każdej iteracji pętli for, podtablica arr[p...i] zawiera elementy mniejsze od pivota, podtablica arr[i+1...j-1]
+# elementy większe od pivota, natomiast podtablica arr[j...r-1] nieprzetworzony jeszcze fragment tablicy.
+# - Inicjalizacja: przed pierwszą iteracją i = p-1, j = p. Podtablice arr[p...p-1] oraz arr[p...p-1] są puste, więc spełniają 
+# niezmiennik pętli. Podtablica arr[p...r-1] zawiera nieprzetworzone elementy. Wszystko się zgadza.
+# - Utrzymanie: mamy do rozpoznania dwa scenariusze. Albo przetwarzany element (arr[j]) jest <= od pivota, albo większy.
+#   a) arr[j] <= pivot: inkrementujemy 'i' przez co wskazuje na pierwszy element z podtablicy większych od pivota, wykonujemy
+# swap dzięki czemu nowy arr[i] jest mniejszy <= od pivota, a arr[j] jest > od pivota. Inkrementacja 'j' przywraca niezmiennik, bo
+# po niej znów arr[i+1...j-1] ma same elementy większe od pivota.
+#   b) arr[j] > pivot: nie robimy nic, dalej arr[p...i] jest <= pivot (nic się nie zmieniło), natomiast inkrementacja 'j' sprawia, że
+# na nowo przed kolejną iteracją arr[i+1...j-1] jest > pivot.
+# - Zakończenie: na końcu pętli j = r, więc arr[p...i] wciąż ma elementy mniejsze od pivota, arr[i+1...j-1] = arr[i+1...r-1] ma
+# elementy większe od pivota.
+# Na końcu algorytmu zamieniamy element arr[i+1] z arr[r], co w efekcie daje nam to, czego oczekiwaliśmy.
+#
+# Teraz możemy pochylić się nad pierwotną procedurą dzielącą, czyli procedurą Hoare. Działa ona w ten sposób, że wybieramy pivot,
+# choć tutaj nie jest on zazwyczaj na końcu, a na początku tablicy. Ustawiamy dwa wskaźniki, i = p-1 oraz j = r+1. Następnie
+# wchodzimy w nieskończoną pętlę, która wyposażona jest w mechanizm wymieniania elementów tablicy aż do momentu, gdy mamy
+# podział na elementy >= od pivotu, oraz <= od pivotu. Jak się znajduje taki podział? Jest to paradoksalnie bardzo proste, poruszamy
+# wskaźnikami 'i' oraz 'j' tak, aby szły do siebie. Jeśli arr[j] <= pivot, wtedy szukamy arr[i] >= pivot, a następnie wymieniamy
+# te dwa elementy za sobą. W efekcie mamy arr[p...i] <= pivot oraz arr[j...r] >= pivot. Zamieniamy te elementy, przy jednym
+# założeniu - takim, że i < j. W przeciwnym wypadku należy zwrócić j jako punkt rozgraniczający te dwie podtablice. 
+#
+
+def hoare_partition(arr, p, q):
+    while True:
+        i = p-1, j = q+1
+        pivot = arr[p]
+        # Znajdź indeksy i,j
+        while True:
+            j -= 1
+            if arr[j] <= pivot:
+                break
+        while True:
+            i += 1
+            if arr[i] >= pivot:
+                break
+        # Jeśli nie spartycjonowaliśmy całej tablicy, to i < j. 
+        # Zamieniamy elementy ze sobą znów mając arr[p...i] <= pivot
+        # oraz arr[j...r] >= pivot
+        if i < j:
+            arr.swap(i,j)
+        else:
+            return j
+
+def hoare_quick_sort(arr, p, r):
+    if p < r:
+        q = hoare_partition(arr, p, r)
+        # Nie jest to błąd, ze względu na sposób partycjonowania Hoare
+        # musimy tutaj wywołać quick sort w taki sposób
+        hoare_quick_sort(arr, p, q)
+        hoare_quick_sort(arr, q+1, r)
+
+#   
+# Złożoność pamięciowa: quick sort z jednej strony jest sortowaniem w miejscu, gdyż nie alokujemy pamięci proporcjonalnej do rozmiaru
+# danych, natomiast z drugiej strony rozmiar stosu wywołań rekurencyjnych jest tutaj równy O(lgn), więc można to potraktować jako
+# złożoność pamięciową.
+#
+# Nie jest to algorytm sortujący stabilnie.
+#
+# Aby zadbać o to, by zminimalizować ryzyko obcowania z pesymistycznym scenariuszem, możemy uzbroić algorytm quick sort w prostą 
+# modyfikację - wystarczy zamiast pivotu na końcu tablicy (bądź na początku, dla Hoare) wybrać losowy pivot, a następnie wstawić go
+# na odpowiednie dla funkcji partycjującej miejsce. W ten sposób sprowdzimy szansę na O(n^2) do marginalnie niskiej.
+# =================================================================================================
+
+# =================================================================================================
+# 6. Sortowania niewykorzystujące porównań:
+# Na wykładzie wykazano, że jeśli dane sortowanie wykorzystuje porównania, to najbardziej optymalny czas w jakim może wykonać swoją
+# pracę jest asymptotycznie równy O(n*lgn). Da się to udowodnić korzystając z tzw. drzew decyzyjnych, ale nie będę tutaj tego
+# przepisywał, dowód nie jest trudny, ale raczej mało istotny, jest na wykładzie o quick sort.
+#
+# Są jednak nawet bardzo proste algorytmy, które sortują tablicę n elementów w czasie O(n). Problem tylko jest taki, że zajmują one
+# znacznie więcej pamięci. Omówię w skrócie kilka z takich algorytmów:
+#
+#   a) Sortowanie przez zliczanie (counting sort):
+# Counting sort jest algorytmem, który wpierw zlicza w pomocniczej tablicy ile razy wystąpił dany element, a następnie w tej ustawia
+# pomocniczą tabelę tak, że C[i] to liczba wystąpień liczby 'i', lub mniejszej. Następnie do tablicy wynikowej wstawia elementy
+# na odpowiednie miejsca. Łatwiej to sobie wyobrazić na przykładzie:
+# - Weźmy, przykładowo, że nasza tablica z danymi wejściowymi wygląda tak: A = [4,3,5,5,1,3,2], n = 7. 
+# - Teraz stwórzmy pomocniczą tablicę C, taką, że spełnia wartość wymienioną powyżej:
+# C = [0,1,2,4,5,7], ponieważ C jest 0-indexed oraz np. liczba 4 wystąpiła jeden raz i była poprzedzona czterema liczbami (1,2,3,3).
+# - Teraz powstaje pytanie: gdzie należy wstawić tę liczbę w wynikowej tablicy B[1...n]? Wstawimy ją na miejscu 5, ponieważ ma cztery
+# liczby, które są przed nią, jak mówi tablica C. Ważne jest aby pamiętać, by później w tablicy zdekrementować liczność liczb <=
+# tej czwórce, gdyż gdyby pojawiła się następna czwórka, to chcemy ją wstawić o jedno miejsce niżej. 
+#
+
+# B to pomocnicza tablica, już dla nas zaalokowana, k to
+# zakres kluczy: {0,1,2,...,k}
+def counting_sort(arr, B, k):
+    n = arr.length
+    # Inicjalizacja C[0...k], same zera
+    C = []
+    for i in range(0, k+1):
+        C[i] = 0
+    # Wypełnienie C, pierwszy etap, liczności pojedynczych elementów
+    for i in range(1, n+1):
+        C[arr[i]] = 0
+    # Wypełnienie C, drugi etap, liczność elementów <= od danego
+    for i in range(1, k+1):
+        C[arr[i]] += C[arr[i-1]]
+    
+    # Wstawienie elementu na odpowiednie miejsce, dekrementacja liczności
+    for i in range(n, 1, -1):
+        elem = arr[i]
+        B[C[elem]] = elem
+        C[elem] -= 1
+
+#
+# Złożoność obliczeniowa tego algorytmu to O(k + n + k) = O(n) gdy k = O(n). 
+# Złożoność pamięciowa to O(n+k) = O(n) dla tego samego założenia. Nie działa w miejscu oczywiście.
+# Algorytm jest stabilny.
+#
+#   b) Sortowanie pozycyjne (radix sort):
+# Sortowanie pozycyjne jest również bardzo prostym algorytmem. Jeśli dysponujemy kluczami, które są d-cyfrowymi liczbami całkowitymi
+# to radix sort na tym, by wpierw posortować liczby po cyfrach jedności, później po dziesiątek itd. Warunkiem koniecznym jest aby
+# sortowanie którego używamy na każdej pozycji było stabilne, inaczej radix sort nie ma prawa działać.
+#
+
+def radix_sort(arr, d):
+    # Zakładamy, że pozycja 1 to cyfra jedności,
+    # 2 to cyfra dziesiątek itd.
+    for i in range(1, d):
+        arr.positionsort(position = i)
+
+#
+# Przeanalizujmy złożoności obliczeniowe i pamięciowe, gdy korzystamy z sortowania przez zliczanie dla każdej pozycji klucza.
+# Złożoność obliczeniowa: sortujemy 'd' razy tablicę, której klucze są zakodowane w alfabecie o 'k' znakach, więc mamy 'k' możliwości
+# dla każdego elementu. Długością tablicy jest 'n', więc ostatecznie złożoność to Theta(d*(n+k)) = Theta(n), bo d-stała, k=O(n).
+# Złożoność pamięciowa: O(n), tak jak w counting sort.
+# =================================================================================================
