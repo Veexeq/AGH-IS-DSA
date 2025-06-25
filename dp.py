@@ -11,7 +11,7 @@
 #
 # Etapy projektowania algorytmu DP:
 # 1. Znajdź optymalną podstrukturę w problemie (tzn., że aby rozwiązać problem optymalnie,
-# mniejsze podproblemy z których się składa, równiez muszą być rozwiązane optymalnie)
+# mniejsze podproblemy z których się składa, również muszą być rozwiązane optymalnie)
 # 2. Zdefiniuj równanie rekurencyjne opisujące koszt
 # 3. Znajdź naturalny porządek i rozwiąż podproblemy sekwencyjnie, wstępująco (np. aby obliczyć
 # n-tą liczbę Fibonacciego wpierw obliczymy n-1 i n-2)
@@ -62,7 +62,7 @@
 #
 # 2. Równanie rekurencyjne: optymalny koszt pomnożenia macierzy A_(i,j) to:
 #   a) m[i,j] = 0, i = j
-#   b) m[i,j] = min(m[i,k] + m[k+1] + p_(i-1) * p_k * p_j), i != j
+#   b) m[i,j] = min(m[i,k] + m[k+1,j] + p_(i-1) * p_k * p_j), i != j
 # Jest tak, ponieważ optymalizujemy wybór k (i <= k < j) i musimy dodać sam koszt pomnożenia macierzy
 # A_1 ma koszt p_0 * p_1, A_2 ma koszt p_1 * p_2, A_i ma koszt p_(i-1) * p_i, gdzie p mamy dane
 #
@@ -198,7 +198,7 @@ dp = discrete_knapsack(W, N, v, w)
 #
 # 2. Równanie rekurencyjne:
 #   a) dp[i,j] = INF, i = 0, j != 0 - to dla przypadku, gdy nie używamy żadnych monet (nie da się uzyskać kwoty)
-#   b) dp[i,j] = 0, j = 0 - to dla przypadku, gdzie mamy do wydania kwotę 0s
+#   b) dp[i,j] = 0, j = 0 - to dla przypadku, gdzie mamy do wydania kwotę 0
 #   c) dp[i,j] = min(dp[i-1,j], dp[i,j-N[i]])
 # Tutaj największa różnica. Zakładając, że mamy do wyboru nieskończenie wiele monet, możemy pozostać w jednej linii
 # (nawet jeśli weźmiemy monetę, to możemy wziąć ją ponownie, więc uzupełniamy kwotę K-N[i] za pomocą wciąż 'i' pierwszych monet)

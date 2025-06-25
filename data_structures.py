@@ -103,6 +103,7 @@
 # w adresowaniu otwartym ma postać h: U x {0,1,...,m-1} ---> h(k). Dlaczego jest to funkcja dwóch zmiennych? Gdyż jeśli
 # nasza 'zwykła' funkcja hashująca (której również będziemy używać) h'(k) zwróci nam klucz, który jest już w użyciu, czyli
 # nastąpi kolizja, to należy w jakiś sposób znaleźć inne miejsce aby wstawić tam nasz element. Do tego przyda się drugi argument.
+#
 # - Wstawianie (polega na obliczaniu na nowo wartości hashy po aktualizowaniu zmiennej 'i'):
 #
 
@@ -445,7 +446,7 @@ def right_rotate(T,x):
 # pomocnicze left-rotate i right-rotate. 
 #
 # Naprawianie własności drzewa czerwono-czarnego dzieli się na dwa główne scenariusze, z których każdy ma trzy scenariusze. 
-# Dwa główne scenariusze są swoimi odbiciami, więc wystarczy zając się jednym z nich. Istotnymi węzłami jest tutaj nowo-wstawiony
+# Dwa główne scenariusze są swoimi odbiciami, więc wystarczy zająć się jednym z nich. Istotnymi węzłami jest tutaj nowo-wstawiony
 # węzeł (z), jego rodzic (z.parent), dziadek (z.parent.parent) a także wujek (y). Wujka oznaczamy y z tego powodu, że może on być 
 # prawym dzieckiem dziadka, bądź też lewym dzieckiem. Z tych przypadków składa się pierwszy wybór dotyczący dwóch głównych scenariuszy.
 # Załóżmy, że wujek jest prawym dzieckiem dziadka, a rodzic z jest jego lewym dzieckiem. Musimy sprawdzić, czy naruszyliśmy własności

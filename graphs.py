@@ -267,3 +267,63 @@ def DFS_TOPO_VISIT(node, res):
 #
 # Złożoność obliczeniowa tego algorytmu jest taka sama jak w przypadku DFS, czyli Theta(V+E). Złożoność
 # pamięciowa to długość nowo utworzonej listy, więc Theta(V).
+# =================================================================================================
+
+# =================================================================================================
+# 3. Silnie spójne składowe:
+# Silnie spójna składowa (strongly connected component) to podzbiór wierzchołków taki, że dla każdej pary wierzchołków (u,v)
+# możemy przejść po grafie zarówno z wierzchołka u do v, jak i na odwrót. Podział grafu na silnie spójne skłaadowe to podstawowe
+# zagadnienie, często będące jednym z pierwszch kroków w bardziej zaawansowanych algorytmach grafowych. Z samej definicji wynika, że
+# podział na silnie spójne składowe, tak samo jak sortowanie topologiczne, dotyczy grafów skierowanych (ale nie acyklicznych jak w topo).
+# Aby zająć się znajdowaniem silnie spójnych składowych, wpierw musimy zrozumieć czym jest transpozycja grafu. Jest to bardzo
+# proste zagadnienie, gdyż wykonując transpozycję po prostu zamieniamy kolejność krawędzi, czyli z krawędzi (u,v) robi się (v,u).
+# Silnie spójne składowe są niezmiennicze ze względu na transpozycję, czyli transpozycja nie modyfikuje silnie spójnych składowych.
+# Aby znaleźć silnie spójnie składowe należy w zasadzie wykonać trzy kroki:
+#
+# - Wykonaj DFS, ponieważ będziemy potrzebować czasu przetworzenia każdego węzła
+# - Transponuj graf
+# - Wykonaj DFS na grafie transponowanym, lecz w pętli w algorytmie DFS (nie DFS_VISIT) gdzie idziemy po wszystkich wierzchołkach,
+# idź po wierzchołkach od największego do najmniejszego czasu przetworzenia. Przed rozpoczęciem kolejnej iteracji tej głównej pętli
+# w DFS, czyli na końcu aktualnej iteracji nasz zbiór wierzchołków przetworzonych przez DFS_VISIT to SCC.
+# 
+# Dlaczego to działa? Z twierdzenia, które mówi o niezmienności SCC ze względu na transpozycje wiemy na pewno, że po transpozycji
+# wciąż uda nam się przejść po wszystkich wierzchołkach danej składowej. Czego się jednak nie uda, to wyjść poza nią, dlatego, że
+# jeśli w grafie G mieliśmy "wyjście" z danej silnie spójnej składowej, to w grafie G^T to wyjście zamieniło się na "wejście", więc
+# nie uda nam się wyjść poza silnie spójną składową. Idziemy w kolejności od największego czasu przetworzenia, bo to oznacza, że
+# jesteśmy w najgłębszym miejscu dla danej silnie spójnej składowej.
+# 
+#             A ---> B ---> E                     A <--- B <--- E
+#             ^      |           Transpozycja     |      ^
+#             |      v             ======>        v      |
+#             D <--- C                            D ---> C 
+#
+# W powyższym przykładzie mamy dwie SCC, zbiór C_1 = {A,B,C,D} oraz zbiór C_2 = {E}. Oba to podzbiory V.
+# Złożoność obliczeniowa algorytmu szukającego silnie spójnych składowych to Theta(V+E), gdyż wykorzystujemy DFS, który ma 
+# właśnie taką złożoność obliczeniową. Poprawność algorytmu jest wykazywana indukcyjnie. Jeśli się nie mylę, to zamysł jest taki,
+# że jeśli jedno drzewo DFS dla grafu G^T tworzy silnie spójną składową, to każde drzewo DFS obliczone w kroku wykonywania DFS na 
+# G^T tworzy silnie spójną składową.
+# =================================================================================================
+
+# =================================================================================================
+# 4. Minimalne drzewo rozpinające (minimum spanning tree):
+# Minimalne drzewo rozpinające to klasyczny problem / algorytm grafowy. Mamy dany graf G(V,E), który ma n wierzchołków, jest 
+# skierowany, a jego krawędzie mają wagi. Chcemy znaleźć minimalne drzewo rozpinające (MST), które łączy wszystkie n wierzchołków
+# używając minimalnej liczby krawędzi (n-1) o minimalnej sumarycznej wadze. Tych drzew może być kilka, jeśli jest kilka wariantów
+# wyboru tych krawędzi, nas jednak interesuje jakieś jedno rozwiązanie. Aby stworzyć takie rozwiązanie, wpierw spójrzmy na pewien
+# "generyczny" algorytm, który później uzbroimy w konkretne kryteria:
+#
+# - Niech A zbiorem, który będzie trzymał krawędzie minimalnego drzewa rozpinającego. Na początku A jest zbiorem pustym
+# - Dopóki A nie tworzy MST:
+#   - Znajdź krawędź, która jest "bezpieczna", dodaj ją do A
+# 
+# Co znaczy, że krawędź jest bezpieczna? Musi ona spełniać jakieś warunki, które sprawią, że dana krawędź nie zepsuje aktualnie
+# tworzonego MST. Okazuje się, że istnieją takie warunki, które omówimy za chwilę. Wpierw jednak należy spojrzeć na dowód poprawności
+# tego algorytmu generycznego.
+#
+# Niezmiennik pętli: na początku każdej iteracji pętli while, A tworzy podzbiór krawędzi z minimalnego drzewa rozpinającego
+# - Inicjalizacja: przed pierwszą iteracją A jest zbiorem pustym, więc spełnione
+# - Utrzymanie: niezmiennik jest zachowany, gdyż dodajemy same bezpieczne krawędzie
+# - Zakończenie: zbiór A zawiera wszystkie krawędzie tworzące pewne MST
+#
+# Wróćmy teraz do zagadnienia bezpiecznych krawędzi. Zacznijmy od wprowadzenia pojęcia przekroju grafu. Będzie ono kluczowe
+# w zrozumieniu logiki stojącą za znajdowaniem krawędzi, którą dodamy do zbioru A. Przekrojem grafu 
